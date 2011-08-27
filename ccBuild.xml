@@ -1,0 +1,171 @@
+<project name="Banco" basedir="." default="emma">
+
+  <!--  Diretorios do projeto  -->
+  <property name="src.dir"            value="src"/>
+  <property name="bin.dir"            value="WebSite/WEB-INF/classes"/>
+  <property name="teste.dir"          value="test"/>
+  <property name="lib.dir"            value="WebSite/WEB-INF/lib"/>
+
+  <!-- Diretorios do PMD-->
+  <property name="pmd.out.dir"       value="out/pmd"/>
+
+  <!-- Diretorios do JUnit-->
+  <property name="junit.out.dir"       value="out/junit"/>
+
+  
+  <!-- Diretorios do Emma -->
+  <property name="emma.bin.dir"       value="out/bin"/>
+  <property name="emma.metadado.dir"  value="out/metadado"/>
+  <property name="emma.relatorio.dir" value="out/relatorio"/>
+
+  <!-- Suite de Teste -->
+  <property name="suite.testes"       value="com.facensa.bank.model.AllTests"/>
+	
+  <!-- Flag indicando se o Emma deve ser executado -->
+  <property name="emma.deveExecutar"   value="true"/>
+
+  <!-- Classpath do projeto -->
+  <path id="project.classpath">
+    <pathelement location="${bin.dir}"/>
+    <fileset dir="${lib.dir}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <!-- Define tasks do Emma -->
+  <taskdef resource="emma_ant.properties">
+    <classpath refid="project.classpath"/>
+  </taskdef>
+
+  <!-- Define tasks do JUnit -->
+  <taskdef name="junit" classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask">
+    <classpath refid="project.classpath"/>
+  </taskdef>
+
+  <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask">
+    <classpath refid="project.classpath"/>
+  </taskdef>
+  
+  <taskdef name="fit" classname="com.cmdev.fit.ant.FitTask">
+    <classpath refid="project.classpath"/>
+  </taskdef>
+  
+  <taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask">
+    <classpath refid="project.classpath"/>
+  </taskdef>
+
+  
+  <!-- Inicializa o diretorio bin, que armazena as classes compiladas -->
+  <target name="init">
+    <delete dir="${bin.dir}"/>
+    <mkdir dir="${bin.dir}"/>
+	<mkdir dir="${emma.bin.dir}"/>
+	<mkdir dir="${emma.metadado.dir}"/>
+	<mkdir dir="${emma.relatorio.dir}"/>
+	<mkdir dir="${pmd.out.dir}"/>
+	<mkdir dir="${junit.out.dir}"/>
+  </target>
+
+  <!-- Compila a aplicacao -->
+  <target name="compilaSrc" depends="init">
+    <javac debug="on" srcdir="${src.dir}" destdir="${bin.dir}">
+      <classpath refid="project.classpath"/>
+    </javac>
+  </target>
+
+  <!-- Emma instrumenta as classes compiladas da aplicacao -->
+  <target name="instrumenta" depends="compilaSrc">
+    <emma enabled="${emma.deveExecutar}">
+      <instr instrpath="${bin.dir}" destdir="${emma.bin.dir}"
+        metadatafile="${emma.metadado.dir}/metadado.emma"
+        merge="false" mode="fullcopy">
+      </instr>
+    </emma>
+  </target>
+
+  <!-- Compila os testes -->
+  <target name="compilaTeste">
+    <javac debug="on" srcdir="${teste.dir}" destdir="${bin.dir}">
+      <classpath refid="project.classpath"/>
+    </javac>
+    
+    <copy todir="${bin.dir}">
+       <fileset dir="${teste.dir}" includes="**/*.xls"/>
+    </copy>
+
+  </target>
+
+  <!-- Executa os testes contra as classes da aplicacao instrumentadas pelo Emma -->
+  <target name="testa" depends="instrumenta, compilaTeste">
+    <junit haltonfailure="false" haltonerror="false" fork="true" printsummary="yes" failureproperty="unit.test.failure">
+      <classpath>
+        <pathelement location="${emma.bin.dir}/classes"/>
+        <pathelement location="${emma.bin.dir}/lib"/>
+        <path refid="project.classpath"/>
+      </classpath>
+	  <formatter type="xml" />
+      <!--formatter type="plain" usefile="false"/-->
+      <test name="${suite.testes}" todir="${junit.out.dir}"/>
+      <jvmarg value="-Demma.coverage.out.file=${emma.metadado.dir}/cobertura.emma"/>
+      <jvmarg value="-Demma.coverage.out.merge=false"/>
+    </junit>  
+    <junitreport todir="${junit.out.dir}">
+      <fileset dir="${junit.out.dir}">
+       <include name="TEST-*.xml" />
+      </fileset>
+      <report format="frames" todir="${junit.out.dir}/html" />
+    </junitreport>
+    <fail message="At least one unit test has failed" if="unit.test.failure" />  
+	</target>
+  
+	<target name="run-acceptance-tests">		
+			<fit usewiki="false" destdir="${junit.out.dir}">
+				<fileset dir="${teste.dir}">
+					<include name="*.html" />
+				</fileset>
+			</fit>
+	</target>  
+
+  <!-- Gera relatorio do Emma -->
+  <target name="emma" depends="testa, run-acceptance-tests, pmd, cpd">
+    <delete dir="${emma.relatorio.dir}"/>
+    <emma enabled="${emma.deveExecutar}">
+      <report sourcepath="${src.dir}"
+        sort="+block,+name,+method,+class"
+        metrics="method:70,block:80,line:80,class:100">
+        <fileset dir="${emma.metadado.dir}">
+          <include name="*.emma"/>
+        </fileset>
+        <html outfile="${emma.relatorio.dir}/index.html" depth="method" columns="name,class,method,block,line"/>
+      </report>
+    </emma>
+    <antcall target="clean"/>
+  </target>
+
+  <!-- Deleta diretorios de trabalho do Emma -->
+  <target name="clean">
+    <delete dir="${emma.bin.dir}"/>
+    <delete dir="${emma.metadado.dir}"/>
+  </target>
+
+  <target name="pmd">
+     <pmd rulesetfiles="rulesets/favorites.xml">
+        <!--formatter type="net.sourceforge.pmd.renderers.HTMLRenderer" toFile="pmd.html"/-->
+	    <formatter type="net.sourceforge.pmd.renderers.SummaryHTMLRenderer" toFile="${pmd.out.dir}/pmd.html"/>
+	    <formatter type="net.sourceforge.pmd.renderers.VBHTMLRenderer" toFile="${pmd.out.dir}/pmd_vb.html"/>
+	    <formatter type="net.sourceforge.pmd.renderers.XMLRenderer" toFile="${pmd.out.dir}/pmd_xml.xml"/>
+            <fileset dir="${src.dir}">
+              <include name="**/*.java"/>
+            </fileset>
+      </pmd>
+  </target>
+
+  <target name="cpd">
+    <cpd minimumTokenCount="30" outputFile="${pmd.out.dir}/cpd_pmd.txt">
+            <fileset dir="${src.dir}">
+              <include name="**/*.java"/>
+            </fileset>
+    </cpd>
+  </target>
+  
+</project>

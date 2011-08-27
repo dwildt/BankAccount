@@ -1,0 +1,67 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Ward Cunningham">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en]C-CCK-MCD compaq  (Win98; U) [Netscape]">
+   <title>Customer Account Limit document</title>
+</head>
+<body>
+
+<h1>
+Customer Account Limit document</h1>
+
+<p>Every customer is able to have an Account Limit, where he is able to loan at ACME bank automatically, but the amount of money available and also the tax applied depend on some variables. There are some rules:
+<ul>
+  <li>Customers with 1 year working with the bank can have only $200 for credit limit, at most.</li>
+  <li>Customers with 2 or 3 years as customers, are able to ask up to $800 for credit limit.</li>
+  <li>Customers with more than three years being customers, can ask up to $1200 for credit limit.</li>
+</ul>
+Check some examples where we will check if a customer with a specific number of years being a customer is able to have a determined value for credit limit.
+<br>&nbsp;
+<table BORDER COLS=1 CELLSPACING=0 CELLPADDING=3 >
+<tr>
+<td COLSPAN="6">com.facensa.bank.fixtures.AccountLimitFixture</td>
+</tr>
+
+<tr>
+<td>yearsAsCustomer</td>
+<td>limitExpected</td>
+<td>validate()</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>0</td>
+<td>ok</td>
+</tr>
+<tr>
+<td>1</td>
+<td>400</td>
+<td>error</td>
+</tr>
+<tr>
+<td>3</td>
+<td>999</td>
+<td>error</td>
+</tr>
+<tr>
+<td>4</td>
+<td>999</td>
+<td>ok</td>
+</tr>
+</table>
+
+<br><br>
+
+<table BORDER CELLSPACING=0 CELLPADDING=3>
+<tr>
+<td COLSPAN="2">fit.Summary</td>
+</tr>
+</table>
+
+<p>Document prepared by Daniel Wildt
+<br>First Version September 01, 2008
+<br>Last Update September 09, 2008
+</body>
+</html>
