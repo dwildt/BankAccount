@@ -1,7 +1,8 @@
-<project name="Banco" basedir="." default="emma">
+<project name="BankAccount" basedir="." default="emma">
 
   <!--  Diretorios do projeto  -->
   <property name="src.dir"            value="src"/>
+  <property name="web.dir"            value="WebSite"/>
   <property name="bin.dir"            value="WebSite/WEB-INF/classes"/>
   <property name="teste.dir"          value="test"/>
   <property name="lib.dir"            value="WebSite/WEB-INF/lib"/>
@@ -12,6 +13,9 @@
   <!-- Diretorios do JUnit-->
   <property name="junit.out.dir"       value="out/junit"/>
 
+  <!-- Diretorio para gera Deploy-->
+  <property name="dist.dir"       value="out/dist"/>
+  <property name="tomcat7.dir"       value="../lib/apache-tomcat-7.0.23/webapps"/>
   
   <!-- Diretorios do Emma -->
   <property name="emma.bin.dir"       value="out/bin"/>
@@ -23,6 +27,11 @@
 	
   <!-- Flag indicando se o Emma deve ser executado -->
   <property name="emma.deveExecutar"   value="true"/>
+  
+  <!-- propriedades do deploy -->
+  <touch file="deployid.properties"/>
+  <property file="deployid.properties"/>
+
 
   <!-- Classpath do projeto -->
   <path id="project.classpath">
@@ -59,6 +68,7 @@
   <target name="init">
     <delete dir="${bin.dir}"/>
     <mkdir dir="${bin.dir}"/>
+    <mkdir dir="${dist.dir}"/>
 	<mkdir dir="${emma.bin.dir}"/>
 	<mkdir dir="${emma.metadado.dir}"/>
 	<mkdir dir="${emma.relatorio.dir}"/>
@@ -167,5 +177,29 @@
             </fileset>
     </cpd>
   </target>
+   
+  <!-- gera o .war e copia para a pasta dist do projeto -->  
+  <target name="war" depends="compilaSrc">  
+    <echo>gerando war file para deploy</echo>  
+    <propertyfile file="deployid.properties">
+      <entry key="build.count" default="0" type="int" operation="+" value="1" pattern="0000"/>
+    </propertyfile>
+     <property file="deployid.properties"/>
+    <war destfile="${dist.dir}/${ant.project.name}##${build.count}.war" webxml="${web.dir}/WEB-INF/web.xml">  
+        <fileset dir="${web.dir}">  
+            <include name="**/*.*"/>                
+            <exclude name="**/*web.xml"/>               
+        </fileset>  
+    </war>  
+  </target>  
   
+  
+  <!-- Deploy!! Foco em Tomcat 7 -->
+  <target name="deploy" depends="testa, run-acceptance-tests, pmd, cpd, war">
+    <move todir="${tomcat7.dir}">
+       <fileset dir="${dist.dir}" includes="**/*.war"/>
+    </move>
+  </target>
+  
+
 </project>

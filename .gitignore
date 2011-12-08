@@ -3,3 +3,4 @@ build
 *.class
 out
 dist
+deployid.properties
