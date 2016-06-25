@@ -1,0 +1,210 @@
+<project name="BankAccount" basedir="." default="jacoco" xmlns:jacoco="antlib:org.jacoco.ant">
+
+  <!--  Diretorios do projeto  -->
+  <property name="src.dir"            value="src"/>
+  <property name="web.dir"            value="WebSite"/>
+  <property name="bin.dir"            value="WebSite/WEB-INF/classes"/>
+  <property name="teste.dir"          value="test"/>
+  <property name="lib.dir"            value="WebSite/WEB-INF/lib"/>
+
+  <!-- Diretorios do PMD-->
+  <property name="pmd.out.dir"       value="out/pmd"/>
+
+  <!-- Diretorios do JUnit-->
+  <property name="junit.out.dir"       value="out/junit"/>
+
+  <!-- Diretorio para gera Deploy-->
+  <property name="dist.dir"       value="out/dist"/>
+  <property name="tomcat7.dir"       value="../../lib/apache-tomcat-7.0.23/webapps"/>
+  
+  <!-- Diretorios do Jacoco -->
+  <property name="jacoco.bin.dir"       value="out/bin"/>
+  <property name="jacoco.metadado.dir"  value="out/metadado"/>
+  <property name="jacoco.metadado.file" value="out/metadado/jacoco.exec"/>
+  <property name="jacoco.relatorio.dir" value="out/relatorio"/>
+
+  <!-- Suite de Teste -->
+  <property name="suite.testes"       value="com.facensa.bank.model.AllTests"/>
+	
+  <!-- Flag indicando se o Jacoco deve ser executado -->
+  <property name="jacoco.deveExecutar"   value="true"/>
+  
+  <!-- propriedades do deploy -->
+  <touch file="deployid.properties"/>
+  <property file="deployid.properties"/>
+
+
+  <!-- Classpath do projeto -->
+  <path id="project.classpath">
+    <pathelement location="${bin.dir}"/>
+    <fileset dir="${lib.dir}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <!-- Define tasks do Jacoco -->
+  <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+    <classpath refid="project.classpath"/>
+  </taskdef>
+
+
+  <!-- Define tasks do JUnit -->
+  <taskdef name="junit" classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask">
+    <classpath refid="project.classpath"/>
+  </taskdef>
+
+  <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask">
+    <classpath refid="project.classpath"/>
+  </taskdef>
+  
+  <taskdef name="fit" classname="com.cmdev.fit.ant.FitTask">
+    <classpath refid="project.classpath"/>
+  </taskdef>
+  
+  <taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask">
+    <classpath refid="project.classpath"/>
+  </taskdef>
+
+  
+  <!-- Inicializa o diretorio bin, que armazena as classes compiladas -->
+  <target name="init">
+    <delete dir="${bin.dir}"/>
+    <mkdir dir="${bin.dir}"/>
+    <mkdir dir="${dist.dir}"/>
+    <mkdir dir="${jacoco.bin.dir}"/>
+    <mkdir dir="${jacoco.metadado.dir}"/>
+    <mkdir dir="${jacoco.relatorio.dir}"/>
+    <mkdir dir="${pmd.out.dir}"/>
+    <mkdir dir="${junit.out.dir}"/>
+  </target>
+
+  <!-- Compila a aplicacao -->
+  <target name="compilaSrc" depends="init">
+    <javac debug="on" srcdir="${src.dir}" destdir="${bin.dir}">
+      <classpath refid="project.classpath"/>
+    </javac>
+  </target>
+
+  <!-- Compila os testes -->
+  <target name="compilaTeste">
+    <javac debug="on" srcdir="${teste.dir}" destdir="${bin.dir}">
+      <classpath refid="project.classpath"/>
+    </javac>
+    
+    <copy todir="${bin.dir}">
+       <fileset dir="${teste.dir}" includes="**/*.xls"/>
+    </copy>
+
+  </target>
+
+  <!-- Executa os testes contra as classes da aplicacao -->
+  <target name="testa" depends="compilaSrc, compilaTeste">
+    <jacoco:coverage destfile="${jacoco.metadado.file}">   
+    <junit haltonfailure="false" haltonerror="false" fork="true" printsummary="yes" failureproperty="unit.test.failure">
+      <classpath>
+        <pathelement location="${bin.dir}"/>
+        <pathelement location="${lib.dir}"/>
+        <path refid="project.classpath"/>
+      </classpath>
+	  <formatter type="xml" />
+      <!--formatter type="plain" usefile="false"/-->
+      <test name="${suite.testes}" todir="${junit.out.dir}"/>
+    </junit>  
+    </jacoco:coverage>
+    <junitreport todir="${junit.out.dir}">
+      <fileset dir="${junit.out.dir}">
+       <include name="TEST-*.xml" />
+      </fileset>
+      <report format="frames" todir="${junit.out.dir}/html" />
+    </junitreport>
+    <fail message="At least one unit test has failed" if="unit.test.failure" />  
+	</target>
+  
+	<target name="run-acceptance-tests">		
+			<fit usewiki="false" destdir="${junit.out.dir}">
+				<fileset dir="${teste.dir}">
+					<include name="*.html" />
+				</fileset>
+			</fit>
+	</target>  
+
+  <!-- Gera relatorio do Jacoco -->
+  <target name="jacoco" depends="testa, run-acceptance-tests, pmd, cpd">
+    <delete dir="${jacoco.relatorio.dir}"/>
+        
+    <jacoco:report>
+        <!-- This task needs the collected execution data and ... -->
+        <executiondata>
+                <file file="${jacoco.metadado.file}" />
+        </executiondata>
+
+        <!-- the class files and optional source files ... -->
+        <structure name="JaCoCo Bank Account">
+                <classfiles>
+                        <fileset dir="${bin.dir}" />
+                </classfiles>
+                <sourcefiles encoding="UTF-8">
+                        <fileset dir="${src.dir}" />
+                </sourcefiles>
+        </structure>
+
+        <!-- to produce reports in different formats. -->
+        <html destdir="${jacoco.relatorio.dir}" />
+        <csv destfile="${jacoco.relatorio.dir}/report.csv" />
+        <xml destfile="${jacoco.relatorio.dir}/report.xml" />
+    </jacoco:report>
+    
+    <antcall target="clean"/>
+  </target>
+
+  <!-- Deleta diretorios de trabalho do Jacoco -->
+  <target name="clean">
+    <delete dir="${jacoco.bin.dir}"/>
+    <delete dir="${jacoco.metadado.dir}"/>
+  </target>
+
+  <target name="pmd">
+     <pmd rulesetfiles="rulesets/favorites.xml">
+        <!--formatter type="net.sourceforge.pmd.renderers.HTMLRenderer" toFile="pmd.html"/-->
+	    <formatter type="net.sourceforge.pmd.renderers.SummaryHTMLRenderer" toFile="${pmd.out.dir}/pmd.html"/>
+	    <formatter type="net.sourceforge.pmd.renderers.VBHTMLRenderer" toFile="${pmd.out.dir}/pmd_vb.html"/>
+	    <formatter type="net.sourceforge.pmd.renderers.XMLRenderer" toFile="${pmd.out.dir}/pmd_xml.xml"/>
+            <fileset dir="${src.dir}">
+              <include name="**/*.java"/>
+            </fileset>
+      </pmd>
+  </target>
+
+  <target name="cpd">
+    <cpd minimumTokenCount="30" outputFile="${pmd.out.dir}/cpd_pmd.txt">
+            <fileset dir="${src.dir}">
+              <include name="**/*.java"/>
+            </fileset>
+    </cpd>
+  </target>
+   
+  <!-- gera o .war e copia para a pasta dist do projeto -->  
+  <target name="war" depends="compilaSrc">  
+    <echo>gerando war file para deploy</echo>  
+    <propertyfile file="deployid.properties">
+      <entry key="build.count" default="0" type="int" operation="+" value="1" pattern="0000"/>
+    </propertyfile>
+     <property file="deployid.properties"/>
+    <war destfile="${dist.dir}/${ant.project.name}##${build.count}.war" webxml="${web.dir}/WEB-INF/web.xml">  
+        <fileset dir="${web.dir}">  
+            <include name="**/*.*"/>                
+            <exclude name="**/*web.xml"/>               
+        </fileset>  
+    </war>  
+  </target>  
+  
+  
+  <!-- Deploy!! Foco em Tomcat 7 -->
+  <target name="deploy" depends="testa, run-acceptance-tests, pmd, cpd, war">
+    <move todir="${tomcat7.dir}">
+       <fileset dir="${dist.dir}" includes="**/*.war"/>
+    </move>
+  </target>
+  
+
+</project>
