@@ -3,7 +3,7 @@ $ ant -f ccBuild.xml
 
 Tools used: 
 - Ant (ccBuild.xml)
-- Emma (Code Coverage)
+- Emma/Jacoco (Code Coverage)
 - PMD (Audit)
 - CPD (Copy and Paste Detector)
 - JUnit (Unit Testing)
