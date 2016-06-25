@@ -1,5 +1,6 @@
 To run this build file:
 $ ant -f ccBuild.xml
+$ ant -f ccBuild_jacoco.xml
 
 Tools used: 
 - Ant (ccBuild.xml)
