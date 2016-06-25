@@ -15,7 +15,7 @@
 
   <!-- Diretorio para gera Deploy-->
   <property name="dist.dir"       value="out/dist"/>
-  <property name="tomcat7.dir"       value="../../lib/apache-tomcat-7.0.23/webapps"/>
+  <property name="tomcat7.dir"       value="../../lib/apache-tomcat-8.0.27/webapps"/>
   
   <!-- Diretorios do Jacoco -->
   <property name="jacoco.bin.dir"       value="out/bin"/>
