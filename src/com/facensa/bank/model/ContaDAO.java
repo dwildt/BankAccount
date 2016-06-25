@@ -14,11 +14,11 @@ public class ContaDAO {
 			SaldoInicialNegativoException {
 		ContaDTO buscaDTO = buscaConta(contaDTO.getConta());
 		if (buscaDTO != null) {
-			throw new ContaExistenteException("Conta j· existente!");
+			throw new ContaExistenteException("Conta j√° existente!");
 		} else {
 			if (contaDTO.getSaldo() <= 0) {
 				throw new SaldoInicialNegativoException(
-						"Saldo inserido È negativo!");
+						"Saldo inserido √© negativo!");
 			} else
 				lista.add(contaDTO);
 			// TODO Validar se cliente existe.

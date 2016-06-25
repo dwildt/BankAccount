@@ -19,7 +19,7 @@ public class InsereLancamentoTeste extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		clienteDAO = new ClienteDAO();
-		ClienteDTO clienteDTO = new ClienteDTO("112", "Zé");
+		ClienteDTO clienteDTO = new ClienteDTO("112", "ZÃ©");
 		clienteDAO.inserir(clienteDTO);
 		contaDAO = new ContaDAO();
 		ContaDTO contaDTO = new ContaDTO(9999, clienteDTO, 12);

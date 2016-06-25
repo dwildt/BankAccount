@@ -13,7 +13,7 @@ public class InsereContaTeste extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		clienteDAO = new ClienteDAO();
-		clienteDAO.inserir(new ClienteDTO("112","Zé"));
+		clienteDAO.inserir(new ClienteDTO("112","ZÃ©"));
 		contaDAO = new ContaDAO();
 	}
 
@@ -27,7 +27,7 @@ public class InsereContaTeste extends TestCase {
 
 	public void testInclusaoConta() {
 		try {
-			ContaDTO contaDTO = new ContaDTO(9999,new ClienteDTO("112","Zé"),12);
+			ContaDTO contaDTO = new ContaDTO(9999,new ClienteDTO("112","Zï¿½"),12);
 			contaDAO.insereConta(contaDTO);
 			assertEquals(1, contaDAO.getCount());
 		} catch (ContaExistenteException e) {
@@ -39,11 +39,11 @@ public class InsereContaTeste extends TestCase {
 
 	public void testContaInexistente() {
 		try {
-			ContaDTO contaDTO = new ContaDTO(9999,new ClienteDTO("112","Zé"),12);
+			ContaDTO contaDTO = new ContaDTO(9999,new ClienteDTO("112","ZÃ©"),12);
 			contaDAO.insereConta(contaDTO);
 			assertEquals(1, contaDAO.getCount());
 			contaDAO.insereConta(contaDTO);
-			fail("Não poderia inserir essa conta! Chora!");
+			fail("NÃ£o poderia inserir essa conta! Chora!");
 		} catch (ContaExistenteException e) {
 
 		} catch (SaldoInicialNegativoException e) {
@@ -52,7 +52,7 @@ public class InsereContaTeste extends TestCase {
 
 	public void testContaSaldoNegativo(){
 		try {
-			ContaDTO contaDTO = new ContaDTO(9998,new ClienteDTO("112","Zé"),-12);
+			ContaDTO contaDTO = new ContaDTO(9998,new ClienteDTO("112","ZÃ©"),-12);
 			contaDAO.insereConta(contaDTO);
 			fail("Nao poderia inserir conta com valor negativo");
 		} catch (ContaExistenteException e) {
@@ -64,7 +64,7 @@ public class InsereContaTeste extends TestCase {
 
 	public void testContaSaldoZero(){
 		try {
-			ContaDTO contaDTO = new ContaDTO(9998,new ClienteDTO("112","Zé"),0);
+			ContaDTO contaDTO = new ContaDTO(9998,new ClienteDTO("112","ZÃ©"),0);
 			contaDAO.insereConta(contaDTO);
 			fail("Nao poderia inserir conta com valor zero");
 		} catch (ContaExistenteException e) {
