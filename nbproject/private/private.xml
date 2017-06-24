@@ -3,6 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/Users/dwildt/Code/github/BankAccount/src/com/facensa/bank/model/ClienteDAO.java</file>
+            <file>file:/Users/dwildt/Code/github/BankAccount/ccBuild_jacoco.xml</file>
+            <file>file:/Users/dwildt/Code/github/BankAccount/test/com/facensa/bank/fixtures/AccountLimitFixture.java</file>
+            <file>file:/Users/dwildt/Code/github/BankAccount/WebSite/index.jsp</file>
+            <file>file:/Users/dwildt/Code/github/BankAccount/test/com/facensa/bank/fixtures/ValidaCPFFixture.java</file>
+            <file>file:/Users/dwildt/Code/github/BankAccount/test/validacpf_fit.html</file>
+        </group>
     </open-files>
 </project-private>

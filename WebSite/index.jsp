@@ -30,7 +30,7 @@
 
 </head>
 <body bgcolor="#ffffff">
-<h1>Main - Manutenção de Clientes UNIDAVI</h1>
+<h1>Main - Manutenção de Clientes UniRitter</h1>
 <f:view>
   <h:form>
 
